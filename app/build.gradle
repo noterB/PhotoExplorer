@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 26
@@ -24,11 +25,16 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude module: 'support-annotations'
+        exclude module: 'support-v4'
+        exclude module: 'support-v13'
+        exclude module: 'recyclerview-v7'
+        exclude module: 'appcompat-v7'
     })
     compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
     compile 'com.android.support:recyclerview-v7:26.0.0-alpha1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.github.bumptech.glide:glide:4.2.0'
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
