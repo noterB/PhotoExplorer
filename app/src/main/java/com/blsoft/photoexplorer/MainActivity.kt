@@ -1,5 +1,6 @@
 package com.blsoft.photoexplorer
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
@@ -7,6 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_main.*
@@ -14,7 +16,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), PhotosView {
 
-    private val presenter = PhotosPresenter(this, FlickrPhotosRepository())
+
+    private val presenter = PhotosPresenter(this, FlickrPhotosRepository)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,13 +26,36 @@ class MainActivity : AppCompatActivity(), PhotosView {
         recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = PhotosAdapter(listOf())
 
+        presenter.getLastQuery()
+
         searchButton.setOnClickListener({
-            if (searchInput.text.isNotBlank()) {
-                Thread(Runnable {
-                    presenter.getPhotosFor(searchInput.text.toString())
-                }).start()
-            }
+            fetchPhotos()
         })
+
+        searchInput.setOnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                hideKeyboard()
+            }
+        }
+    }
+
+    private fun fetchPhotos() {
+        if (searchInput.text.isNotBlank()) {
+            Thread(Runnable {
+                presenter.getPhotosFor(searchInput.text.toString())
+            }).start()
+        }
+        recyclerView.requestFocus()
+    }
+
+    override fun onLastQuery(query: String) {
+        searchInput.setText(query)
+        fetchPhotos()
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(searchInput.windowToken, 0)
     }
 
     override fun onPhotoList(photos: List<PhotoModel>) {
@@ -40,8 +66,7 @@ class MainActivity : AppCompatActivity(), PhotosView {
 }
 
 
-
-class PhotosAdapter(val list: List<PhotoModel>) : RecyclerView.Adapter<PhotosAdapter.ViewHolder>() {
+class PhotosAdapter(private val list: List<PhotoModel>) : RecyclerView.Adapter<PhotosAdapter.ViewHolder>() {
 
     override fun getItemCount(): Int = list.size
 

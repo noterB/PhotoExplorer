@@ -6,11 +6,26 @@ import java.net.URL
 import java.net.URLEncoder
 
 
-class FlickrPhotosRepository : PhotosRepository {
+object FlickrPhotosRepository : PhotosRepository {
+
+
 
     private val apiKey = "d83d183927fd2af478dfd9a3633e6524"
+    private var lastSearch:Map<String, List<PhotoModel>> = mapOf()
+    private var lastQuery: String = ""
+
+    override fun getLastQuery(): String {
+        return lastQuery
+    }
 
     override fun getPhotosFor(query: String): List<PhotoModel> {
+        lastQuery = query
+        if (lastSearch.containsKey(query)) {
+            lastSearch[query]?.let {
+                lastQuery = query
+                return it
+            }
+        }
         val encodedUrl = URLEncoder.encode(query, "UTF-8")
         val url = URL("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=$apiKey&text=$encodedUrl&per_page=20&format=json&nojsoncallback=1")
         val conn = url.openConnection() as HttpURLConnection
@@ -25,6 +40,9 @@ class FlickrPhotosRepository : PhotosRepository {
             val flickrPhotoModel = FlickrPhotoModel(jsonPhoto.getString("id"), jsonPhoto.getInt("farm"), jsonPhoto.getString("server"), jsonPhoto.getString("secret"))
             photos.add(flickrPhotoModel)
         }
-        return photos.toList()
+
+        val list = photos.toList()
+        lastSearch = mapOf(query to list)
+        return list
     }
 }
