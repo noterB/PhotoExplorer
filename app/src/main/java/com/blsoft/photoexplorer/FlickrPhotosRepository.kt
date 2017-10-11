@@ -9,7 +9,7 @@ import java.net.URLEncoder
 object FlickrPhotosRepository : PhotosRepository {
 
 
-    private val apiKey = "d83d183927fd2af478dfd9a3633e6524"
+    private val apiKey = "de241d9722c36890137908ffca389656"
     private var lastSearch:Map<String, List<PhotoModel>> = mapOf()
     private var lastQuery: String = ""
 
