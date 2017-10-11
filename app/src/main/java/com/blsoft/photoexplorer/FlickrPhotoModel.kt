@@ -1,9 +1,16 @@
 package com.blsoft.photoexplorer
 
-/**
- * Created by developer on 10/9/17.
- */
-class FlickrPhotoModel(val photoId: String, val farm: Int, val server: String, val secret: String) : PhotoModel {
+class FlickrPhotoModel(override val photoId: String,
+                       val farm: Int,
+                       val server: String,
+                       val secret: String) : PhotoModel {
+
+    override var photographer: String = ""
+    override var location: String = ""
+    override var title: String = ""
+
+    override fun getUrl(): String =
+            "https://farm$farm.staticflickr.com/$server/${photoId}_${secret}_z.jpg"
 
     override fun getThumbnailUrl(): String =
             "https://farm$farm.staticflickr.com/$server/${photoId}_${secret}_q.jpg"

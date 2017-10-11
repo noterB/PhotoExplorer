@@ -9,14 +9,40 @@ import java.net.URLEncoder
 object FlickrPhotosRepository : PhotosRepository {
 
 
-
     private val apiKey = "d83d183927fd2af478dfd9a3633e6524"
     private var lastSearch:Map<String, List<PhotoModel>> = mapOf()
     private var lastQuery: String = ""
 
-    override fun getLastQuery(): String {
-        return lastQuery
+    override fun getLastQuery(): String = lastQuery
+
+    override fun getPhotoModelFor(photoId: String): PhotoModel? {
+        lastSearch[lastQuery]?.let {
+            return it.find {
+                it.photoId == photoId
+            }
+        }
+        return null
     }
+
+    override fun loadDetailsFor(photoModel: PhotoModel): PhotoModel {
+        val url = URL("https://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key=$apiKey&photo_id=${photoModel.photoId}&format=json&nojsoncallback=1")
+        val conn = url.openConnection() as HttpURLConnection
+        conn.connect()
+        val jsonString = conn.inputStream.reader().readText()
+        conn.disconnect()
+        val photoJson = JSONObject(jsonString).getJSONObject("photo")
+        val ownerJson = photoJson.getJSONObject("owner")
+        val titleJson = photoJson.getJSONObject("title")
+        val realname = ownerJson.getString("realname")
+        val location = ownerJson.getString("location")
+        val title = titleJson.getString("_content")
+        photoModel.photographer = realname
+        photoModel.location = location
+        photoModel.title = title
+
+        return photoModel
+    }
+
 
     override fun getPhotosFor(query: String): List<PhotoModel> {
         lastQuery = query
@@ -45,4 +71,6 @@ object FlickrPhotosRepository : PhotosRepository {
         lastSearch = mapOf(query to list)
         return list
     }
+
+
 }

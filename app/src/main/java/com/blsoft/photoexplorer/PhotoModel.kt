@@ -1,8 +1,12 @@
 package com.blsoft.photoexplorer
 
-/**
- * Created by developer on 10/9/17.
- */
+import android.os.Parcelable
+
 interface PhotoModel {
+    val photoId: String
+    var photographer: String
+    var location: String
+    var title: String
     fun getThumbnailUrl(): String
+    fun getUrl(): String
 }

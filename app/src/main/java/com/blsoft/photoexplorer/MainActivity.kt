@@ -1,6 +1,7 @@
 package com.blsoft.photoexplorer
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
@@ -23,7 +24,8 @@ class MainActivity : AppCompatActivity(), PhotosView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
+        val cols = (resources.displayMetrics.widthPixels / resources.displayMetrics.density) / 150
+        recyclerView.layoutManager = GridLayoutManager(this, cols.toInt())
         recyclerView.adapter = PhotosAdapter(listOf())
 
         presenter.getLastQuery()
@@ -73,6 +75,11 @@ class PhotosAdapter(private val list: List<PhotoModel>) : RecyclerView.Adapter<P
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val thumbnailUrl = list[position].getThumbnailUrl()
         Glide.with(holder.itemView.context).load(thumbnailUrl).into(holder.image)
+        holder.itemView.setOnClickListener {
+            val intent = Intent(it.context, PhotoDetailsActivity::class.java)
+            intent.putExtra("photoId", list[position].photoId)
+            it.context.startActivity(intent)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
