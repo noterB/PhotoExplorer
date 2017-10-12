@@ -1,11 +1,17 @@
 package com.blsoft.photoexplorer
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_photo_details.*
+import java.net.URL
+import android.graphics.drawable.BitmapDrawable
+import android.os.Looper
+
 
 class PhotoDetailsActivity : AppCompatActivity(), PhotoDetailsView {
 
@@ -22,9 +28,22 @@ class PhotoDetailsActivity : AppCompatActivity(), PhotoDetailsView {
         }).start()
     }
 
+    override fun onDestroy() {
+        (detailImage.getDrawable() as BitmapDrawable).bitmap.recycle()
+        super.onDestroy()
+    }
+
+
     override fun onDetailsLoaded(photoModel: PhotoModel) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            Thread({
+                onDetailsLoaded(photoModel)
+            }).start()
+            return
+        }
+        val bitmap = BitmapFactory.decodeStream(URL(photoModel.getUrl()).openStream())
         runOnUiThread {
-            Glide.with(this).load(photoModel.getUrl()).into(detailImage)
+            detailImage.setImageBitmap(bitmap)
             photographerTextView.text = photoModel.photographer
             locationTextView.text = photoModel.location
             photoTitleTextView.text = photoModel.title

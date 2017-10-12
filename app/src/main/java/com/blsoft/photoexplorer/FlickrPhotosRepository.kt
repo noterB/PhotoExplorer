@@ -53,7 +53,7 @@ object FlickrPhotosRepository : PhotosRepository {
             }
         }
         val encodedUrl = URLEncoder.encode(query, "UTF-8")
-        val url = URL("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=$apiKey&text=$encodedUrl&per_page=20&format=json&nojsoncallback=1")
+        val url = URL("https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=$apiKey&text=$encodedUrl&per_page=40&format=json&nojsoncallback=1")
         val conn = url.openConnection() as HttpURLConnection
         conn.connect()
         val jsonString = conn.inputStream.reader().readText()
